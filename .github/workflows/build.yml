@@ -14,25 +14,38 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Pinned: this image ships the Android SDK preinstalled ($ANDROID_HOME).
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
 
-      - uses: android-actions/setup-android@v3
+      - name: Android SDK
+        run: |
+          echo "::notice title=Android SDK::$ANDROID_HOME | platforms: $(ls "$ANDROID_HOME/platforms" 2>/dev/null | tr '\n' ' ') | build-tools: $(ls "$ANDROID_HOME/build-tools" 2>/dev/null | tr '\n' ' ')"
 
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Build release APK
+        id: build
         run: |
+          set -o pipefail
           chmod +x gradlew
-          ./gradlew --no-daemon assembleRelease
+          ./gradlew --no-daemon --console=plain assembleRelease 2>&1 | tee build.log
           cp app/build/outputs/apk/release/app-release.apk "Lumen-0.1.${{ github.run_number }}.apk"
           sha256sum "Lumen-0.1.${{ github.run_number }}.apk" | tee SHA256.txt
+
+      # Surface compiler errors as one annotation (readable without downloading logs).
+      - name: Report build errors
+        if: failure() && steps.build.outcome == 'failure'
+        run: |
+          errs=$( { grep -E '^e: ' build.log | sed -E 's#file://[^ ]*/(app/src/[^ ]*)#\1#' | head -60; \
+                    grep -A8 'What went wrong' build.log | head -20; } | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+          echo "::error title=Build errors::${errs:-No compiler errors found; see the log}"
 
       - uses: actions/upload-artifact@v4
         with:
