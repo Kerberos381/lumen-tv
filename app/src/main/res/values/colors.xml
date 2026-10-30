@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="lumen_bg">#FF0B0C10</color>
+    <color name="lumen_accent">#FF0A84FF</color>
+    <color name="ic_launcher_bg">#FF1B2A6B</color>
+</resources>

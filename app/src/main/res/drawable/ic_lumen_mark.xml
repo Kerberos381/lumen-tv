@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lumen mark: a wide "top shelf" over a row of three tiles. 108dp adaptive canvas, 66dp safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M35,32 H73 A5,5 0 0 1 78,37 V51 A5,5 0 0 1 73,56 H35 A5,5 0 0 1 30,51 V37 A5,5 0 0 1 35,32 Z" />
+    <path
+        android:fillColor="#CCFFFFFF"
+        android:pathData="M33,62 H41 A3,3 0 0 1 44,65 V71 A3,3 0 0 1 41,74 H33 A3,3 0 0 1 30,71 V65 A3,3 0 0 1 33,62 Z" />
+    <path
+        android:fillColor="#99FFFFFF"
+        android:pathData="M50,62 H58 A3,3 0 0 1 61,65 V71 A3,3 0 0 1 58,74 H50 A3,3 0 0 1 47,71 V65 A3,3 0 0 1 50,62 Z" />
+    <path
+        android:fillColor="#66FFFFFF"
+        android:pathData="M67,62 H75 A3,3 0 0 1 78,65 V71 A3,3 0 0 1 75,74 H67 A3,3 0 0 1 64,71 V65 A3,3 0 0 1 67,62 Z" />
+</vector>

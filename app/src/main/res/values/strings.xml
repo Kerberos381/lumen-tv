@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lumen</string>
+
+    <!-- Accessibility service (shown by Android when you turn it on) -->
+    <string name="helper_label">Lumen helper</string>
+    <string name="helper_description">Lumen helper adds three things to the Lumen home screen: a small snapshot of the app you leave when you press Home (Android 11 or newer), Recents when you press Home twice, and returning to Lumen if the TV\'s own home screen appears. It watches remote button presses only to notice Home. It does not read text or controls in other apps, snapshots stay on this TV, and Lumen has no internet access.</string>
+
+    <!-- Home -->
+    <string name="tile_tv_settings">Settings</string>
+    <string name="tile_lumen">Lumen</string>
+    <string name="hint_open">Press OK to open</string>
+    <string name="hint_open_settings">Layout, Recents and Top Shelf options</string>
+    <string name="up_next">Up Next</string>
+    <string name="cant_open">Can\'t open %1$s</string>
+    <string name="move_hint">Use the arrows to move it · OK when done</string>
+    <string name="hidden_toast">%1$s hidden. Show it again in Lumen settings.</string>
+
+    <!-- Long-press menu -->
+    <string name="opt_move">Move</string>
+    <string name="opt_hide">Hide from Home</string>
+    <string name="opt_info">App info</string>
+    <string name="opt_uninstall">Uninstall</string>
+
+    <!-- Recents -->
+    <string name="recents_title">Recent apps</string>
+    <string name="recents_empty">No recent apps yet</string>
+    <string name="recents_hint">OK to open  ·  ▲ to close the app  ·  Back to return</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Lumen</string>
+    <string name="s_helper">Lumen helper</string>
+    <string name="s_helper_sub">Snapshots in Recents, double-press Home for Recents, and always returning to Lumen. Turn it on in Accessibility.</string>
+    <string name="s_helper_old_android">This TV runs an Android version before 11, so Recents shows app artwork instead of snapshots.</string>
+    <string name="s_redirect">Always return to Lumen</string>
+    <string name="s_redirect_sub">Needs the helper. Use it if the Home button still opens the TV\'s own home screen.</string>
+    <string name="s_default_home">Default Home app</string>
+    <string name="s_default_home_sub">Which home screen the Home button opens.</string>
+    <string name="s_usage">Recent apps history</string>
+    <string name="s_usage_sub">\"Usage access\" lets Recents include apps you opened outside Lumen.</string>
+    <string name="s_shelf_perm">Top Shelf content</string>
+    <string name="s_shelf_perm_sub">Lets Top Shelf show the Up Next rows apps publish, where the TV allows it.</string>
+    <string name="s_shelf_show">Show Top Shelf</string>
+    <string name="s_shelf_show_sub">The large preview above the top row of apps.</string>
+    <string name="s_hidden">Hidden apps</string>
+    <string name="s_hidden_sub">Show all hidden apps on Home again.</string>
+    <string name="s_reset">Reset Home layout</string>
+    <string name="s_reset_sub">Go back to the default app order.</string>
+    <string name="s_tv_settings">TV settings</string>
+    <string name="s_tv_settings_sub">Open the TV\'s own settings.</string>
+    <string name="s_about">About Lumen</string>
+    <string name="s_about_sub">No internet permission. Nothing leaves your TV.</string>
+
+    <string name="v_on">On</string>
+    <string name="v_off">Off</string>
+    <string name="v_allowed">Allowed</string>
+    <string name="v_not_allowed">Not allowed</string>
+    <string name="v_lumen">Lumen</string>
+    <string name="v_other">TV\'s own</string>
+
+    <string name="toast_find_helper">Find \"Lumen helper\" in the list and turn it on.</string>
+    <string name="toast_already_allowed">Already allowed.</string>
+    <string name="toast_reset">Home layout reset.</string>
+
+    <string name="confirm_unhide">Show %1$d hidden apps on Home again?</string>
+    <string name="confirm_reset">Reset the app order on Home?</string>
+    <string name="action_show">Show</string>
+    <string name="action_reset">Reset</string>
+
+    <string name="adb_helper_intro">This TV has no Accessibility screen Lumen can open. From a computer on the same network, with ADB debugging on, run:</string>
+    <string name="adb_home_intro">This TV has no Home app setting. From a computer on the same network, with ADB debugging on, run:</string>
+    <string name="adb_usage_intro">This TV has no Usage access screen. From a computer on the same network, with ADB debugging on, run:</string>
+    <string name="adb_shelf_intro">The permission was declined. To allow it later, from a computer on the same network with ADB debugging on, run:</string>
+</resources>
