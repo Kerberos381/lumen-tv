@@ -12,6 +12,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.provider.Settings
+import android.util.Log
 import android.view.Display
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
@@ -30,6 +31,7 @@ class HelperService : AccessibilityService() {
 
     companion object {
         const val DOUBLE_PRESS_MS = 500L
+        private const val TAG = "LumenHelper"
 
         @Volatile
         var instance: HelperService? = null
@@ -63,6 +65,7 @@ class HelperService : AccessibilityService() {
         instance = this
         prefs = Prefs(this)
         refreshHomeActivities()
+        Log.i(TAG, "connected, snapshots=$canSnapshot")
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
@@ -108,6 +111,7 @@ class HelperService : AccessibilityService() {
         } else {
             lastHomeDown = now
             val fg = foreground
+            Log.i(TAG, "Home in $fg")
             if (fg != null && fg != packageName && fg !in homePackages) {
                 RecentsStore.get(this).touch(fg)
                 capture(fg)
@@ -133,16 +137,23 @@ class HelperService : AccessibilityService() {
                         val small = Bitmap.createScaledBitmap(sw, w, h, true)
                         if (small !== sw) sw.recycle()
                         // Protected video (Netflix etc.) captures as black: fall back to artwork.
-                        if (Images.isMostlyBlack(small)) return
+                        if (Images.isMostlyBlack(small)) {
+                            Log.i(TAG, "snapshot of $pkg is black (protected video), skipped")
+                            return
+                        }
                         RecentsStore.get(this@HelperService).putSnapshot(pkg, small)
+                        Log.i(TAG, "snapshot of $pkg saved")
                     } catch (t: Throwable) {
                         // A missing snapshot only means Recents shows the app's artwork.
+                        Log.w(TAG, "snapshot of $pkg failed", t)
                     } finally {
                         buffer.close()
                     }
                 }
 
-                override fun onFailure(errorCode: Int) = Unit
+                override fun onFailure(errorCode: Int) {
+                    Log.w(TAG, "screenshot of $pkg failed, code $errorCode")
+                }
             })
         }
     }
