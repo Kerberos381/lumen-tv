@@ -30,8 +30,22 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # Fail instead of publishing a build signed with a throwaway key.
+      - name: Signing key
+        env:
+          LUMEN_KEYSTORE_B64: ${{ secrets.LUMEN_KEYSTORE_B64 }}
+        run: |
+          if [ -z "$LUMEN_KEYSTORE_B64" ]; then
+            echo "::error title=Signing key::LUMEN_KEYSTORE_B64 secret is not set"; exit 1
+          fi
+          echo "$LUMEN_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/lumen.p12"
+          echo "LUMEN_KEYSTORE=$RUNNER_TEMP/lumen.p12" >> "$GITHUB_ENV"
+
       - name: Build release APK
         id: build
+        env:
+          LUMEN_STORE_PASSWORD: ${{ secrets.LUMEN_STORE_PASSWORD }}
+          LUMEN_KEY_PASSWORD: ${{ secrets.LUMEN_KEY_PASSWORD }}
         run: |
           set -o pipefail
           chmod +x gradlew

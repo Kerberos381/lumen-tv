@@ -133,11 +133,16 @@ Stack: Kotlin, Android framework only (no AndroidX, no third-party libraries).
 
 ## Signing key
 
-`keystore/lumen.jks` signs every build so updates install over the previous version and
-keep your layout. It is committed so CI can use it, which is fine for a **private**
-repository. If you make the repository public, generate a new key, store it as GitHub
-Actions secrets, and set `LUMEN_STORE_PASSWORD` / `LUMEN_KEY_PASSWORD` (read by
-`app/build.gradle.kts`).
+Builds are signed with a personal key that is **not** in the repository. CI reads it from
+three GitHub Actions secrets: `LUMEN_KEYSTORE_B64` (the PKCS12 keystore, base64),
+`LUMEN_STORE_PASSWORD` and `LUMEN_KEY_PASSWORD`. Without them the build fails rather
+than publish an APK that can't update yours.
+
+For local release builds, put the keystore at `keystore/lumen.p12` (ignored by git) and
+export the two passwords. Without it, local builds use the debug key.
+
+Keep a backup of the key: an APK signed with a different key cannot install over Lumen,
+and switching keys means uninstalling (which resets your layout).
 
 ## Code map
 

@@ -18,26 +18,29 @@ android {
         versionName = "0.1.$buildNumber"
     }
 
-    signingConfigs {
-        // A personal key kept in the repo so every CI build can update the
-        // installed app in place. Keep the repository private (see README).
-        create("lumen") {
-            storeFile = rootProject.file("keystore/lumen.jks")
-            storePassword = System.getenv("LUMEN_STORE_PASSWORD") ?: "lumen-tv-key"
+    // The signing key never lives in the repo. CI decodes it from the
+    // LUMEN_KEYSTORE_B64 secret; locally, put it at keystore/lumen.p12 (ignored by git).
+    val keystore = rootProject.file(System.getenv("LUMEN_KEYSTORE") ?: "keystore/lumen.p12")
+    val lumenKey = if (keystore.exists()) {
+        signingConfigs.create("lumen") {
+            storeFile = keystore
+            storeType = "pkcs12"
+            storePassword = System.getenv("LUMEN_STORE_PASSWORD")
             keyAlias = "lumen"
-            keyPassword = System.getenv("LUMEN_KEY_PASSWORD") ?: "lumen-tv-key"
+            keyPassword = System.getenv("LUMEN_KEY_PASSWORD")
         }
-    }
+    } else null
 
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("lumen")
+            // Without the key, local release builds use the debug key and cannot update a CI build.
+            signingConfig = lumenKey ?: signingConfigs.getByName("debug")
         }
         debug {
-            signingConfig = signingConfigs.getByName("lumen")
+            lumenKey?.let { signingConfig = it }
         }
     }
 
