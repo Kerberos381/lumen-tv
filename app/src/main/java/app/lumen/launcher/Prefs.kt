@@ -24,6 +24,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("show_top_shelf", true)
         set(v) = sp.edit().putBoolean("show_top_shelf", v).apply()
 
+    /** Home background: [Backgrounds.ART] (the focused app's artwork) or a scene key. */
+    var background: String
+        get() = sp.getString("background", Backgrounds.ART) ?: Backgrounds.ART
+        set(v) = sp.edit().putString("background", v).apply()
+
     var askedShelfPermission: Boolean
         get() = sp.getBoolean("asked_shelf_permission", false)
         set(v) = sp.edit().putBoolean("asked_shelf_permission", v).apply()

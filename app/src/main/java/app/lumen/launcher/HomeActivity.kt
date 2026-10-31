@@ -24,6 +24,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextClock
 import android.widget.TextView
 import android.widget.Toast
@@ -77,11 +78,13 @@ class HomeActivity : Activity() {
     private lateinit var page: FrameLayout
     private lateinit var shelf: TopShelfView
     private lateinit var tileLayer: FrameLayout
-    private lateinit var clock: TextClock
+    private lateinit var clock: LinearLayout
+    private lateinit var clockFill: GradientDrawable
     private lateinit var moveHint: TextView
     private lateinit var zoom: ZoomView
     private lateinit var recents: RecentsView
     private var menu: OptionsMenuView? = null
+    private var controlCenter: ControlCenterView? = null
 
     // State.
     private var apps = ArrayList<AppEntry>()
@@ -311,17 +314,10 @@ class HomeActivity : Activity() {
         }
         page.addView(tileLayer, FrameLayout.LayoutParams(MATCH, MATCH))
 
-        clock = TextClock(this).apply {
-            format12Hour = "h:mm"
-            format24Hour = "H:mm"
-            setTextColor(Palette.TEXT)
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, screenH * 0.036f)
-            typeface = Fonts.light
-            setShadowLayer(14f, 0f, 2f, 0x80000000.toInt())
-        }
+        clock = buildClockPill()
         root.addView(clock, FrameLayout.LayoutParams(WRAP, WRAP).apply {
             gravity = Gravity.TOP or Gravity.END
-            topMargin = (screenH * 0.045f).roundToInt()
+            topMargin = (screenH * 0.04f).roundToInt()
             rightMargin = marginX
         })
 
@@ -349,6 +345,46 @@ class HomeActivity : Activity() {
 
         recents = RecentsView(this, screenW, screenH).apply { listener = recentsListener }
         root.addView(recents, FrameLayout.LayoutParams(MATCH, MATCH))
+    }
+
+    /** Date and time on a glass pill; its tint follows the backdrop behind it. */
+    private fun buildClockPill(): LinearLayout {
+        clockFill = GradientDrawable().apply {
+            cornerRadius = screenH * 0.04f
+            setColor(0x33FFFFFF)
+            setStroke(1.dp, 0x30FFFFFF)
+        }
+        val padH = (screenH * 0.026f).roundToInt()
+        val padV = (screenH * 0.01f).roundToInt()
+        val pill = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            background = clockFill
+            setPadding(padH, padV, padH, padV)
+        }
+        val date = TextClock(this).apply {
+            format12Hour = "EEE d MMM"
+            format24Hour = "EEE d MMM"
+            setTextColor(Palette.TEXT_DIM)
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, screenH * 0.024f)
+            typeface = Fonts.medium
+        }
+        val time = TextClock(this).apply {
+            format12Hour = "h:mm"
+            format24Hour = "H:mm"
+            setTextColor(Palette.TEXT)
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, screenH * 0.032f)
+            typeface = Fonts.regular
+        }
+        pill.addView(date)
+        pill.addView(time, LinearLayout.LayoutParams(WRAP, WRAP).apply { leftMargin = (screenH * 0.018f).roundToInt() })
+        return pill
+    }
+
+    /** Darker glass over bright backdrops so the white text stays readable. */
+    private fun tintClockPill(backdrop: Bitmap) {
+        val lum = Images.luminance(backdrop, fromX = 0.6f, toY = 0.3f)
+        clockFill.setColor(if (lum > 0.45f) 0x66000000 else 0x33FFFFFF)
     }
 
     private fun reloadApps() {
@@ -454,13 +490,17 @@ class HomeActivity : Activity() {
     private fun frontBackdrop(): ImageView = if (frontIsA) backA else backB
 
     private fun setBackdrop(e: AppEntry) {
-        if (backdropKey == e.key) return
-        backdropKey = e.key
+        val scene = Backgrounds.scene(prefs.background)
+        val key = if (scene != null) "scene:" + prefs.background else e.key
+        if (backdropKey == key) return
+        backdropKey = key
+        val image = scene ?: e.backdrop
+        tintClockPill(image)
         val incoming = if (frontIsA) backB else backA
         val outgoing = frontBackdrop()
         frontIsA = !frontIsA
         incoming.animate().cancel()
-        incoming.setImageBitmap(e.backdrop)
+        incoming.setImageBitmap(image)
         incoming.alpha = 0f
         incoming.animate().alpha(backdropLevel).setDuration(420L).start()
         outgoing.animate().alpha(0f).setDuration(420L).start()
@@ -509,6 +549,7 @@ class HomeActivity : Activity() {
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (recents.isShowing) return recents.handleKey(event)
+        controlCenter?.let { return it.handleKey(event) }
         menu?.let { return it.handleKey(event) }
         val code = event.keyCode
         val isNav = code == KeyEvent.KEYCODE_DPAD_UP || code == KeyEvent.KEYCODE_DPAD_DOWN ||
@@ -528,7 +569,7 @@ class HomeActivity : Activity() {
                 return true
             }
             code == KeyEvent.KEYCODE_MENU -> {
-                if (event.action == KeyEvent.ACTION_UP) openLumenSettings()
+                if (event.action == KeyEvent.ACTION_UP) showControlCenter()
                 return true
             }
         }
@@ -603,6 +644,7 @@ class HomeActivity : Activity() {
 
     private fun goToTop() {
         menu?.dismiss()
+        controlCenter?.dismiss()
         if (recents.isShowing) recents.hide(animate = true)
         if (moving) endMove()
         if (inShelf) leaveShelf()
@@ -679,6 +721,7 @@ class HomeActivity : Activity() {
         recentsOpenedAt = SystemClock.uptimeMillis()
         if (recents.isShowing) return
         menu?.dismiss()
+        controlCenter?.let { closeControlCenter() }
         if (moving) endMove()
         zoom.hide()
         returnIndex = -1
@@ -697,6 +740,31 @@ class HomeActivity : Activity() {
                 ui.post { if (recents.isShowing) recents.setSnapshot(e.packageName, bmp) }
             }
         }
+    }
+
+    // ---------------------------------------------------------------- control center
+
+    private val controlActions = object : ControlCenterView.Actions {
+        override fun showRecents() = this@HomeActivity.showRecents()
+        override fun openLumenSettings() = this@HomeActivity.openLumenSettings()
+        override fun backgroundChanged() {
+            backdropKey = null
+            apps.getOrNull(focus)?.let { setBackdrop(it) }
+        }
+    }
+
+    private fun showControlCenter() {
+        if (controlCenter != null || recents.isShowing || zoom.isAnimating) return
+        menu?.dismiss()
+        if (moving) endMove()
+        val cc = ControlCenterView(this, screenW, screenH, controlActions) { closeControlCenter() }
+        controlCenter = cc
+        root.addView(cc, FrameLayout.LayoutParams(MATCH, MATCH))
+    }
+
+    private fun closeControlCenter() {
+        controlCenter?.let { root.removeView(it) }
+        controlCenter = null
     }
 
     // ---------------------------------------------------------------- long-press menu

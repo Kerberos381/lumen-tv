@@ -22,6 +22,29 @@
     <string name="opt_info">App info</string>
     <string name="opt_uninstall">Uninstall</string>
 
+    <!-- Backgrounds -->
+    <string name="bg_art">App artwork</string>
+    <string name="bg_aurora">Aurora</string>
+    <string name="bg_dusk">Dusk ocean</string>
+    <string name="bg_desert">Night desert</string>
+    <string name="bg_dark">Dark</string>
+
+    <!-- Control Center (Menu button) -->
+    <string name="cc_title">Control Center</string>
+    <string name="cc_volume">Volume</string>
+    <string name="cc_muted">Muted</string>
+    <string name="cc_play_pause">Play / Pause</string>
+    <string name="cc_playing">Playing</string>
+    <string name="cc_recents">Recent apps</string>
+    <string name="cc_background">Background</string>
+    <string name="cc_network">Network &amp; Wi-Fi</string>
+    <string name="cc_bluetooth">Remotes &amp; Bluetooth</string>
+    <string name="cc_picture">Picture</string>
+    <string name="cc_sound">Sound</string>
+    <string name="cc_lumen">Lumen settings</string>
+    <string name="cc_tv_settings">TV settings</string>
+    <string name="cc_hint">◀ ▶ to change  ·  OK to choose  ·  Back to close</string>
+
     <!-- Recents -->
     <string name="recents_title">Recent apps</string>
     <string name="recents_empty">No recent apps yet</string>
@@ -42,6 +65,8 @@
     <string name="s_shelf_perm_sub">Lets Top Shelf show the Up Next rows apps publish, where the TV allows it.</string>
     <string name="s_shelf_show">Show Top Shelf</string>
     <string name="s_shelf_show_sub">The large preview above the top row of apps.</string>
+    <string name="s_background">Background</string>
+    <string name="s_background_sub">The focused app\'s artwork, or a scene drawn on the TV. Also in Control Center (Menu).</string>
     <string name="s_hidden">Hidden apps</string>
     <string name="s_hidden_sub">Show all hidden apps on Home again.</string>
     <string name="s_reset">Reset Home layout</string>

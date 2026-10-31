@@ -141,6 +141,21 @@ object Images {
         }
     }
 
+    /** Average brightness (0..1) of the region right of [fromX] and above [toY] (fractions of the size). */
+    fun luminance(b: Bitmap, fromX: Float = 0f, toY: Float = 1f): Float {
+        val steps = 8
+        val x0 = (b.width - 1) * fromX
+        val y1 = (b.height - 1) * toY
+        var sum = 0f
+        for (yi in 0 until steps) for (xi in 0 until steps) {
+            val x = (x0 + (b.width - 1 - x0) * xi / (steps - 1)).toInt()
+            val y = (y1 * yi / (steps - 1)).toInt()
+            val p = runCatching { b.getPixel(x, y) }.getOrDefault(Color.BLACK)
+            sum += (Color.red(p) * 0.3f + Color.green(p) * 0.59f + Color.blue(p) * 0.11f) / 255f
+        }
+        return sum / (steps * steps)
+    }
+
     /** True for an (almost) black frame, e.g. DRM-protected video in a screenshot. */
     fun isMostlyBlack(b: Bitmap): Boolean {
         val steps = 12

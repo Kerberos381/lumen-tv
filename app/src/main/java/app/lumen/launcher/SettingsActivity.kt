@@ -136,6 +136,14 @@ class SettingsActivity : Activity() {
                 render()
             },
             Row(
+                getString(R.string.s_background), getString(R.string.s_background_sub),
+                Backgrounds.label(this, prefs.background)
+            ) {
+                prefs.background = Backgrounds.next(prefs.background, 1)
+                prefs.bumpLayout()
+                render()
+            },
+            Row(
                 getString(R.string.s_hidden), getString(R.string.s_hidden_sub),
                 hiddenCount.toString()
             ) { if (hiddenCount > 0) confirmUnhide(hiddenCount) },

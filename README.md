@@ -16,6 +16,9 @@ Built for a Philips Android TV. Works on Android 9 (API 28) and newer.
 | Long-press OK: Move, Hide, App info, Uninstall | Nothing |
 | Top Shelf hero (artwork + name of the focused top-row app) | Nothing |
 | Top Shelf "Up Next" rows published by apps | "Top Shelf content" permission, and a TV that lets launchers read them |
+| Control Center (Menu): volume, play/pause, Recents, background, TV settings shortcuts | Nothing |
+| Backgrounds: app artwork, or Aurora, Dusk ocean, Night desert, Dark (drawn on the TV) | Nothing |
+| Date and time on a glass pill that adapts to the backdrop | Nothing |
 | Recents (double-press Home) with app artwork | Lumen as default Home, or the helper |
 | Recents including apps opened outside Lumen | "Usage access" |
 | Recents with live snapshots | The helper, Android 11+ |
@@ -31,9 +34,9 @@ Built for a Philips Android TV. Works on Android 9 (API 28) and newer.
 | Back | Jump to the top row | Return |
 | Home | Back to the top row | Return |
 | Home ×2 | Recents | |
-| Menu | Lumen settings | |
+| Menu | Control Center | |
 
-The **Lumen** tile at the end of the grid opens settings too, and a **Settings** tile opens
+Lumen settings are in Control Center and on the **Lumen** tile at the end of the grid, and a **Settings** tile opens
 the TV's own settings (the stock launcher's gear is gone once Lumen is your home screen).
 
 ## Install
