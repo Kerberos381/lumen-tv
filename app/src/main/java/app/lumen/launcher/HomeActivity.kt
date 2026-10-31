@@ -75,6 +75,7 @@ class HomeActivity : Activity() {
     private lateinit var backA: ImageView
     private lateinit var backB: ImageView
     private var frontIsA = true
+    private lateinit var heroScrim: View
     private lateinit var page: FrameLayout
     private lateinit var shelf: TopShelfView
     private lateinit var tileLayer: FrameLayout
@@ -292,6 +293,15 @@ class HomeActivity : Activity() {
             )
         }
         root.addView(scrim, FrameLayout.LayoutParams(MATCH, MATCH))
+        // Behind an app's last screen: darken the left so the app name stays readable.
+        heroScrim = View(this).apply {
+            background = GradientDrawable(
+                GradientDrawable.Orientation.LEFT_RIGHT,
+                intArrayOf(0xCC000000.toInt(), 0x66000000, 0x00000000)
+            )
+            alpha = 0f
+        }
+        root.addView(heroScrim, FrameLayout.LayoutParams(MATCH, MATCH))
 
         page = FrameLayout(this).apply {
             clipChildren = false
@@ -507,11 +517,16 @@ class HomeActivity : Activity() {
         backdropKey = key
         val image = scene ?: snap ?: e.backdrop
         tintClockPill(image)
+        val fullBleed = scene == null && snap != null
+        heroScrim.animate().alpha(if (fullBleed) 1f else 0f).setDuration(420L).start()
         val incoming = if (frontIsA) backB else backA
         val outgoing = frontBackdrop()
         frontIsA = !frontIsA
         incoming.animate().cancel()
         incoming.setImageBitmap(image)
+        // A real screen is much brighter than blurred artwork: dim it to sit behind Home.
+        if (fullBleed) incoming.setColorFilter(0x59000000, android.graphics.PorterDuff.Mode.SRC_ATOP)
+        else incoming.clearColorFilter()
         incoming.alpha = 0f
         incoming.animate().alpha(backdropLevel).setDuration(420L).start()
         outgoing.animate().alpha(0f).setDuration(420L).start()

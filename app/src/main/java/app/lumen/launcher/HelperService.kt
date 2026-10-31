@@ -132,7 +132,8 @@ class HelperService : AccessibilityService() {
                         val sw = hw.copy(Bitmap.Config.ARGB_8888, false)
                         hw.recycle()
                         if (sw == null) return
-                        val w = 640
+                        // Wide enough to fill Home's background without looking blocky.
+                        val w = 1280
                         val h = (w.toFloat() * sw.height / sw.width).toInt().coerceAtLeast(1)
                         val small = Bitmap.createScaledBitmap(sw, w, h, true)
                         if (small !== sw) sw.recycle()
