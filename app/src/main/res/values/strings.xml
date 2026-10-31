@@ -10,6 +10,7 @@
     <string name="tile_tv_settings">Settings</string>
     <string name="tile_lumen">Lumen</string>
     <string name="hint_open">Press OK to open</string>
+    <string name="hint_resume">Press OK to continue</string>
     <string name="hint_open_settings">Layout, Recents and Top Shelf options</string>
     <string name="up_next">Up Next</string>
     <string name="cant_open">Can\'t open %1$s</string>

@@ -273,10 +273,12 @@ class TopShelfView(
     private val cardW = (screenW * 0.205f).toInt()
     private val cardH = cardW * 9 / 16
     private val cardTextH = (screenH * 0.075f).toInt()
+    private val artTop = topPad + (shelfH - topPad - artH) / 2 - (screenH * 0.015f).toInt()
 
     /** What the shelf is showing, or about to show once the cross-fade finishes. */
     private var targetKey: String? = null
     private var targetIsItems = false
+    private var targetFull = false
     private var targetItems: List<ShelfItem>? = null
     private var showingItems = false
     private val cards = ArrayList<ShelfCardView>()
@@ -290,7 +292,6 @@ class TopShelfView(
         addView(content, LayoutParams(LayoutParams.MATCH_PARENT, shelfH))
 
         // Hero: artwork on the left, name on the right, vertically centred in the shelf.
-        val artTop = topPad + (shelfH - topPad - artH) / 2 - (screenH * 0.015f).toInt()
         hero.addView(heroArt, LayoutParams(artW, artH).apply {
             leftMargin = marginX
             topMargin = artTop
@@ -301,20 +302,18 @@ class TopShelfView(
             typeface = Fonts.light
             maxLines = 2
             ellipsize = TextUtils.TruncateAt.END
+            setShadowLayer(18f, 0f, 2f, 0x99000000.toInt())
         }
         heroSub.apply {
             setTextColor(Palette.TEXT_DIM)
             setTextSize(TypedValue.COMPLEX_UNIT_PX, screenH * 0.024f)
             typeface = Fonts.regular
             setPadding(0, (screenH * 0.012f).toInt(), 0, 0)
+            setShadowLayer(12f, 0f, 1f, 0x99000000.toInt())
         }
         heroText.addView(heroTitle)
         heroText.addView(heroSub)
-        val textLeft = marginX + artW + (screenW * 0.035f).toInt()
-        hero.addView(heroText, LayoutParams(screenW - textLeft - marginX, artH).apply {
-            leftMargin = textLeft
-            topMargin = artTop
-        })
+        hero.addView(heroText, heroTextParams(fullBleed = false))
         heroText.gravity = Gravity.CENTER_VERTICAL
         content.addView(hero, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
 
@@ -338,20 +337,44 @@ class TopShelfView(
         content.addView(cardsGroup, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
     }
 
-    fun showHero(e: AppEntry, subtitle: String) {
-        if (!targetIsItems && targetKey == e.key) return
+    /**
+     * The app's card and name. With [fullBleed] the backdrop is the app's own last screen, so
+     * the card goes and the name sits bottom-left over it, as on tvOS.
+     */
+    fun showHero(e: AppEntry, subtitle: String, fullBleed: Boolean = false) {
+        if (!targetIsItems && targetKey == e.key && targetFull == fullBleed) return
         targetKey = e.key
         targetIsItems = false
+        targetFull = fullBleed
         swap {
             showingItems = false
             focusedCard = -1
             heroArt.entry = e
+            heroArt.visibility = if (fullBleed) GONE else VISIBLE
+            heroText.layoutParams = heroTextParams(fullBleed)
+            heroText.gravity = if (fullBleed) Gravity.BOTTOM else Gravity.CENTER_VERTICAL
+            heroTitle.setTextSize(TypedValue.COMPLEX_UNIT_PX, screenH * (if (fullBleed) 0.072f else 0.058f))
             heroTitle.text = e.label
             heroSub.text = subtitle
             hero.visibility = VISIBLE
             cardsGroup.visibility = GONE
             cardsLayer.removeAllViews()
             cards.clear()
+        }
+    }
+
+    private fun heroTextParams(fullBleed: Boolean): LayoutParams {
+        if (fullBleed) {
+            return LayoutParams((screenW * 0.6f).toInt(), LayoutParams.WRAP_CONTENT).apply {
+                gravity = Gravity.BOTTOM or Gravity.START
+                leftMargin = marginX
+                bottomMargin = (screenH * 0.075f).toInt()
+            }
+        }
+        val textLeft = marginX + artW + (screenW * 0.035f).toInt()
+        return LayoutParams(screenW - textLeft - marginX, artH).apply {
+            leftMargin = textLeft
+            topMargin = artTop
         }
     }
 

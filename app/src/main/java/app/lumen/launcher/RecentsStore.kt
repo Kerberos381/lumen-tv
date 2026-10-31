@@ -110,6 +110,10 @@ class RecentsStore private constructor(context: Context) {
         return snaps.get(pkg)
     }
 
+    /** Snapshot already in memory, whenever it was taken. Main-thread safe. */
+    @Synchronized
+    fun cachedSnapshot(pkg: String): Bitmap? = snaps.get(pkg)
+
     /** Snapshot from memory or disk. May hit the disk: call off the main thread. */
     fun snapshot(pkg: String): Bitmap? {
         synchronized(this) { snaps.get(pkg)?.let { return it } }

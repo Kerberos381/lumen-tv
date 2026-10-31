@@ -204,6 +204,8 @@ class HomeActivity : Activity() {
                 val tile = tiles[i]
                 zoom.updateImage(RecentsStore.get(this).memorySnapshot(tile.entry.packageName, since))
                 zoom.playClose(tileRect(i), tile.radius * tile.scaleX)
+                // Pick up the fresh last-screen snapshot for the background.
+                scheduleShelfRefresh(600L)
             }, 110L)
         }
     }
@@ -489,12 +491,21 @@ class HomeActivity : Activity() {
 
     private fun frontBackdrop(): ImageView = if (frontIsA) backA else backB
 
-    private fun setBackdrop(e: AppEntry) {
+    /** The app's last screen, shown full-screen behind the shelf when the background is its artwork. */
+    private fun heroSnapshot(e: AppEntry): Bitmap? =
+        if (e.isPseudo || prefs.background != Backgrounds.ART) null
+        else RecentsStore.get(this).cachedSnapshot(e.packageName)
+
+    private fun setBackdrop(e: AppEntry, snap: Bitmap? = null) {
         val scene = Backgrounds.scene(prefs.background)
-        val key = if (scene != null) "scene:" + prefs.background else e.key
+        val key = when {
+            scene != null -> "scene:" + prefs.background
+            snap != null -> e.key + "#" + System.identityHashCode(snap)
+            else -> e.key
+        }
         if (backdropKey == key) return
         backdropKey = key
-        val image = scene ?: e.backdrop
+        val image = scene ?: snap ?: e.backdrop
         tintClockPill(image)
         val incoming = if (frontIsA) backB else backA
         val outgoing = frontBackdrop()
@@ -514,30 +525,40 @@ class HomeActivity : Activity() {
     private fun refreshShelf() {
         if (inShelf || moving) return
         val e = apps.getOrNull(focus) ?: return
-        setBackdrop(e)
-        if (rowOf(focus) != 0 || !prefs.showTopShelf) return
-
-        val cached = shelfCache[e.key]
-        if (!cached.isNullOrEmpty()) shelf.showItems(e, cached) else shelf.showHero(e, heroSubtitle(e))
+        val snap = heroSnapshot(e)
+        setBackdrop(e, snap)
+        val showShelf = rowOf(focus) == 0 && prefs.showTopShelf
+        if (showShelf) {
+            val cached = shelfCache[e.key]
+            if (!cached.isNullOrEmpty()) shelf.showItems(e, cached) else showHero(e, snap != null)
+        }
         if (e.isPseudo) return
 
         val token = ++shelfToken
         val ctx = applicationContext
+        // Snapshots not yet in memory are read from disk here.
+        val wantSnap = snap == null && prefs.background == Backgrounds.ART
         io.execute {
-            val items = TopShelfSource.load(ctx, e.packageName)
+            val diskSnap = if (wantSnap) RecentsStore.get(ctx).snapshot(e.packageName) else null
+            val items = if (showShelf) TopShelfSource.load(ctx, e.packageName) else emptyList()
             ui.post {
                 if (token != shelfToken || isDestroyed || inShelf) return@post
                 val old = shelfCache[e.key]
-                shelfCache[e.key] = items
+                if (showShelf) shelfCache[e.key] = items
                 if (apps.getOrNull(focus)?.key != e.key) return@post
+                if (diskSnap != null) setBackdrop(e, diskSnap)
+                if (!showShelf) return@post
                 when {
                     items.isNotEmpty() && !sameItems(old, items) -> shelf.showItems(e, items)
-                    items.isEmpty() && !old.isNullOrEmpty() -> shelf.showHero(e, heroSubtitle(e))
+                    items.isEmpty() && (!old.isNullOrEmpty() || diskSnap != null) -> showHero(e, snap != null || diskSnap != null)
                     else -> Unit
                 }
             }
         }
     }
+
+    private fun showHero(e: AppEntry, fullBleed: Boolean) =
+        shelf.showHero(e, if (fullBleed) getString(R.string.hint_resume) else heroSubtitle(e), fullBleed)
 
     private fun sameItems(a: List<ShelfItem>?, b: List<ShelfItem>): Boolean =
         a != null && a.size == b.size && a.indices.all { a[it].title == b[it].title && a[it].subtitle == b[it].subtitle }

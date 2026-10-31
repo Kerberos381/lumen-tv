@@ -22,6 +22,7 @@ Built for a Philips Android TV. Works on Android 9 (API 28) and newer.
 | Recents (double-press Home) with app artwork | Lumen as default Home, or the helper |
 | Recents including apps opened outside Lumen | "Usage access" |
 | Recents with live snapshots | The helper, Android 11+ |
+| Full-screen Top Shelf: the focused app's last screen behind Home, as on tvOS | The helper, Android 11+ (apps with protected video show their artwork) |
 | Home always returns to Lumen | The helper |
 
 ## Remote
